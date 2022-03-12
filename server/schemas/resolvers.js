@@ -4,20 +4,17 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
     Query: {
-      addThought: async (parent, args, context) => {
+      me: async (parent, args, context) => {
         if (context.user) {
-          const thought = await Thought.create({ ...args, username: context.user.username });
-      
-          await User.findByIdAndUpdate(
-            { _id: context.user._id },
-            { $push: { thoughts: thought._id } },
-            { new: true }
-          );
-      
-          return thought;
+          const userData = await User.findOne({ _id: context.user._id })
+            .select('-__v -password')
+            .populate('thoughts')
+            .populate('friends');
+  
+          return userData;
         }
-      
-        throw new AuthenticationError('You need to be logged in!');
+  
+        throw new AuthenticationError('Not logged in');
       },
         thoughts: async (parent, { username }) => {
             const params = username ? { username } : {};
@@ -60,6 +57,21 @@ const resolvers = {
             }
             const token = signToken(user);
             return { token, user };
+        },
+        addThought: async (parent, args, context) => {
+          if (context.user) {
+            const thought = await Thought.create({ ...args, username: context.user.username });
+    
+            await User.findByIdAndUpdate(
+              { _id: context.user._id },
+              { $push: { thoughts: thought._id } },
+              { new: true }
+            );
+    
+            return thought;
+          }
+    
+          throw new AuthenticationError('You need to be logged in!');
         }
     }
   };
