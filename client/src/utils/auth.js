@@ -30,10 +30,15 @@ class AuthService {
 
   //retrieve token from localStorage
   getToken() {
-      //Saves user token to localStorage
-      localStorage.setItem('id_token', idToken);
+      // Retrieves the user token from localStorage
+    return localStorage.getItem('id_token');
+  }
 
-      window.location.assign('/';)
+  login(idToken) {
+    // Saves user token to localStorage
+    localStorage.setItem('id_token', idToken);
+
+    window.location.assign('/');
   }
 
   //ckear token from localStorage and force logout with reload
